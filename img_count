@@ -1,0 +1,57 @@
+/*This script can be run in standard linux terminal/mac/windows
+
+Groovy must be installed on OS before running this script. This is developed on Groovy 2.4.4
+Please provide path of img_count_output.txt file for inputFile variable in the code (commented below where to provide)
+After providing path run this script standalone and output will be generated for each entry in img_count_output.txt file as shown below.
+
+Output:
+test failed: img count from test file:0 and Current image count:67
+test passed: img count from test file:66 and Current image count:66
+
+Other Test Cases:
+1. URL can be validated in a similar way as below
+2. imdb_id can be validated in a similar way as below.
+3. Any other information can be gathererd from HTML and can be validated.
+
+*/
+
+@Grab(group='org.codehaus.groovy.modules.http-builder', module='http-builder', version='0.7' )
+
+import groovyx.net.http.HTTPBuilder
+import static groovyx.net.http.Method.GET
+import static groovyx.net.http.ContentType.JSON
+import groovy.json.*
+import org.cyberneko.html.parsers.SAXParser
+import groovy.util.XmlSlurper
+import groovy.json.JsonSlurper
+
+//provide path for img_count_output.txt
+def inputFile = new File("/Users/hanu/Desktop/amit/validate-image-count/img_count_output.txt")
+def InputJSON = new JsonSlurper().parseText(inputFile.text)
+
+for (i=0;i<=(InputJSON.size()-1);i++){
+urlValue="${InputJSON[i].url}"
+countValue="${InputJSON[i].count}"
+
+def http = new HTTPBuilder(urlValue) 
+
+def parsedText = http.get([:])
+
+//println(parsedText.children()."**".findAll{it.name()=='IMG'}.size())
+//println(parsedText.children().name())
+
+//imgCount=parsedText."**".findAll {it.@src.toString().contains("http://ia.media-imdb.com")}
+//println(imgCount.getAt(2).name())
+//foreach(imgCount){println(imgCount.childNodes().parent().name().toString())}
+
+
+imgCount=parsedText."**".findAll {it.name()=='IMG'}
+
+
+   if (imgCount.size().toString()==countValue){
+       println( "test passed: img count from test file:${countValue} and Current image count:${imgCount.size().toString()}")
+    }
+   else{
+       println ("test failed: img count from test file:${countValue} and Current image count:${imgCount.size().toString()}")
+   }
+}
